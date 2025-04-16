@@ -26,7 +26,18 @@ tags:
 - slurm6
 
 timeout: 14400s  # 4hr
+substitutions:
+  _TRIGGER_BUILD_CONFIG_PATH: tools/cloud-build/daily-tests/builds/ml-a3-ultragpu-slurm.yaml
 steps:
+# While using static network names we are gaurding against more than 1 instance running at a time (for multi-group tests)
+- id: check_for_running_build
+  name: gcr.io/cloud-builders/gcloud
+  entrypoint: /bin/bash
+  env:
+  - "TRIGGER_BUILD_CONFIG_PATH=${_TRIGGER_BUILD_CONFIG_PATH}"
+  args:
+  - tools/check_running_build.sh
+
 - id: ml-a3-ultragpu-slurm
   name: us-central1-docker.pkg.dev/$PROJECT_ID/hpc-toolkit-repo/test-runner
   entrypoint: /bin/bash
